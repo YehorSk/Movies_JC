@@ -1,6 +1,7 @@
 package com.example.movies_jc.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,6 +16,8 @@ import com.example.movies_jc.MoviesApplication
 import com.example.movies_jc.data.MoviesRepository
 import com.example.movies_jc.data.NetworkMoviesRepository
 import com.example.movies_jc.model.Movie
+import com.example.movies_jc.model.MovieDetails
+import com.example.movies_jc.ui.screens.core.MovieGridScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,6 +31,12 @@ sealed interface MoviesUiState{
     object Loading : MoviesUiState
 }
 
+sealed interface MovieDetailsUiState{
+    data class Success(val movie: MovieDetails) : MovieDetailsUiState
+    object Error : MovieDetailsUiState
+    object Loading : MovieDetailsUiState
+}
+
 data class SelectedMovieUiState(
     val movie: Movie? = null
 )
@@ -39,6 +48,9 @@ class MoviesViewModel(
     var moviesUiState: MoviesUiState by mutableStateOf(MoviesUiState.Loading)
         private set
 
+    var movieDetailsUiState: MovieDetailsUiState by mutableStateOf(MovieDetailsUiState.Loading)
+        private set
+
     private val _selectedMovieUiState = MutableStateFlow(SelectedMovieUiState())
     val selectedMovieUiState: StateFlow<SelectedMovieUiState> = _selectedMovieUiState.asStateFlow()
 
@@ -48,10 +60,10 @@ class MoviesViewModel(
     }
 
     fun selectMovie(movie: Movie){
-        _selectedMovieUiState.update { currentState ->
-            currentState.copy(movie = movie)
+        _selectedMovieUiState.update {
+            it.copy(movie = movie)
         }
-        Log.d("Movie",movie.title)
+        getMovieDetails()
     }
 
     fun getMovies(){
@@ -60,6 +72,16 @@ class MoviesViewModel(
                 MoviesUiState.Success(moviesRepository.getMovies())
             }catch (e: IOException){
                 MoviesUiState.Error
+            }
+        }
+    }
+
+    fun getMovieDetails(){
+        viewModelScope.launch {
+            movieDetailsUiState = try{
+                MovieDetailsUiState.Success(moviesRepository.getMovie(selectedMovieUiState.value.movie?.id.toString()))
+            }catch (e: IOException){
+                MovieDetailsUiState.Error
             }
         }
     }

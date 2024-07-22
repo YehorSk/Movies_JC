@@ -51,6 +51,11 @@ android {
 }
 
 dependencies {
+
+    val nav_version = "2.7.7"
+
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+
     implementation("io.coil-kt:coil-compose:2.4.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")

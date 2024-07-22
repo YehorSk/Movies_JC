@@ -12,7 +12,10 @@ import retrofit2.http.Query
 class DefaultAppContainer : AppContainer {
     private val baseUrl = "https://api.themoviedb.org/3/"
 
-    private val json = Json { ignoreUnknownKeys = true }
+    val json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
 
     private val retrofit = Retrofit.Builder()
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))

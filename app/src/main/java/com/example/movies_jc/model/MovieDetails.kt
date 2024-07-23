@@ -6,6 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MovieDetails(
     val id: Int,
+    @SerialName("original_title")
+    val title: String,
     @SerialName("backdrop_path")
     val backdropPath: String,
     @SerialName("belongs_to_collection")
